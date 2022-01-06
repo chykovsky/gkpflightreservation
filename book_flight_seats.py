@@ -12,27 +12,25 @@
 # Add functionality if more messages would like to be seen concerning what issue happened.
 #   Maybe use a global flag or do that. So it prints "Fail" and adds a context to it.
 # Output: Success or Fail
+import re
+import pickle
 
+BOOK_CANCEL_INFO = """
+\tExpected format [Action] [Starting Seat] [Number of consecutive seats needed]
+\tAction: BOOK or CANCEL
+\tStarting Seat: A0 - T7
+\tNumber of consecutive seats needed: 1 - 8
+"""
 
-row_letter_index_map = {
-    'A': 0,
-    'B': 1,
-    'C': 2,
-    'D': 3,
-    'E': 4,
-    'F': 5,
-    'G': 6,
-    'H': 7,
-    'I': 8,
-    'J': 9,
-    'K': 10,
-    'L': 11,
-    'M': 12,
-    'N': 13,
-    'O': 14,
-    'P': 15,
-    'Q': 16,
-    'R': 17,
-    'S': 18,
-    'T': 19
-}
+booking_details = input('Book or Cancel a seat reservation: ')
+regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
+m = regex.match(booking_details)
+
+action, start_seat, num_consecutive_seats = "", "", 0
+if m:
+    action, start_seat, num_consecutive_seats = m.group().split()
+else:
+    print('%s%s' % ('Invalid Input entered: ', BOOK_CANCEL_INFO))
+    exit(1)
+
+print(action, start_seat, num_consecutive_seats)
