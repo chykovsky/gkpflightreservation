@@ -63,7 +63,7 @@ class SeatReservation(object):
             exit(1)
 
     @classmethod
-    def get_seat_location(cls, ss):
+    def get_location(cls, ss):
         """
         Return row number corresponding to row letter received
         :param ss: starting seat e.g A0, B1, T7
@@ -74,7 +74,7 @@ class SeatReservation(object):
         return int(row_letter_index_map[a[0].upper()]), int(a[1])
 
     @classmethod
-    def get_seat_letter(cls, seat_location):
+    def get_letter(cls, seat_location):
         for i in seat_location:
             return i.upper()
 
@@ -85,7 +85,7 @@ class SeatReservation(object):
         :param seat_location:
         :return:
         """
-        row, col = self.get_seat_location(seat_location)
+        row, col = self.get_location(seat_location)
         seat = reservation[row][col]
 
         if not seat.reserved:
@@ -102,8 +102,8 @@ class SeatReservation(object):
         if self.is_reserved(reservations, self.start_seat):
             return False
 
-        row, col = self.get_seat_location(self.start_seat)
-        row_letter = self.get_seat_letter(self.start_seat)
+        row, col = self.get_location(self.start_seat)
+        row_letter = self.get_letter(self.start_seat)
         max_index = col + (self.num_consecutive_seats - 1)
 
         if max_index > len(reservations[row]) - 1:
@@ -116,8 +116,8 @@ class SeatReservation(object):
         return True
 
     def is_unreservable(self, reservation):
-        row, col = self.get_seat_location(self.start_seat)
-        row_letter = self.get_seat_letter(self.start_seat)
+        row, col = self.get_location(self.start_seat)
+        row_letter = self.get_letter(self.start_seat)
         max_index = col + (self.num_consecutive_seats - 1)
 
         if max_index > len(reservation[row]) - 1:
@@ -146,14 +146,14 @@ class SeatReservation(object):
         return 'Fail'
 
     def reserve_seat(self, reservation):
-        row, col = self.get_seat_location(self.start_seat)
+        row, col = self.get_location(self.start_seat)
 
         for seat_column in range(col, col + self.num_consecutive_seats + 1):
             seat = reservation[row][seat_column]
             seat.reserve()
 
     def unreserve_seat(self, reservation):
-        row, col = self.get_seat_location(self.start_seat)
+        row, col = self.get_location(self.start_seat)
 
         for seat_column in range(col, col + self.num_consecutive_seats + 1):
             seat = reservation[row][seat_column]
@@ -176,4 +176,4 @@ class SeatReservation(object):
         return 'Fail'
 
     def reset(self):
-        pass
+        self.fds.reset()
