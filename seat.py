@@ -7,3 +7,6 @@ class Seat(object):
 
     def unreserve(self):
         self.reserved = False
+
+    def __str__(self):
+        pass
