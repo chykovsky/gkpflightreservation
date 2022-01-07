@@ -32,4 +32,4 @@ class FileDataStore(object):
 
     def reset(self):
         self.res = self.res_original
-        self.update(self.res_original)
+        self.write()

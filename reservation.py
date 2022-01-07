@@ -1,6 +1,7 @@
 from datastore import FileDataStore
 from seat import Seat
 import re
+import os.path
 
 
 BOOK_CANCEL_INFO = """
@@ -37,15 +38,21 @@ row_letter_index_map = {
 class SeatReservation(object):
     def __init__(self, filename, rows, cols):
         self.rows, self.seats_per_row = (rows, cols)
-        self.reservations = [[Seat() for _ in range(self.seats_per_row)] for _ in range(self.rows)]
-        self.fds = FileDataStore(filename, self.reservations)
-        self.fds.write()
+        if not os.path.exists(filename):
+            self.reservations = [[Seat() for _ in range(self.seats_per_row)] for _ in range(self.rows)]
+            self.fds = FileDataStore(filename, self.reservations)
+            self.fds.write()
         self.action = None
         self.start_seat = None
         self.num_consecutive_seats = None
 
     def process_request(self):
         booking_details = input('Book or Cancel a seat reservation: ')
+
+        if 'reset'.upper() in booking_details.upper():
+            self.fds.reset()
+            exit(0)
+
         regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
         m = regex.match(booking_details)
 
