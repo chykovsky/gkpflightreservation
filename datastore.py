@@ -1,12 +1,10 @@
 import pickle
-from copy import deepcopy
 
 
 class FileDataStore(object):
     def __init__(self, filename, reservations=None):
         self.fn = filename
         self.res = reservations
-        self.res_original = deepcopy(reservations)
 
     def write(self):
         try:
@@ -29,7 +27,3 @@ class FileDataStore(object):
                 pickle.dump(reservations, f)
         except FileNotFoundError:
             return
-
-    def reset(self):
-        self.res = self.res_original
-        self.write()

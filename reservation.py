@@ -37,11 +37,11 @@ row_letter_index_map = {
 
 class SeatReservation(object):
     def __init__(self, filename, rows, cols):
-        self.rows, self.seats_per_row = rows, cols
-        self.reservations, self.fds = None, FileDataStore(filename)
-        self.reservations = [[Seat() for _ in range(self.seats_per_row)] for _ in range(self.rows)]
-        self.fds = FileDataStore(filename, self.reservations)
-        self.fds.write()
+        self.filename, self.rows, self.seats_per_row, = filename, rows, cols
+        if not os.path.exists(self.filename):
+            reservations = [[Seat() for _ in range(self.seats_per_row)] for _ in range(self.rows)]
+            self.fds = FileDataStore(self.filename, reservations)
+            self.fds.write()
         self.action = None
         self.start_seat = None
         self.num_consecutive_seats = None
@@ -137,9 +137,6 @@ class SeatReservation(object):
         :param reservations:
         :return: True or False
         """
-        if self.is_reserved(reservations, self.start_seat):
-            return False
-
         row, col = self.get_location(self.start_seat)
         row_letter = self.get_letter(self.start_seat)
         max_index = col + (self.num_consecutive_seats - 1)
@@ -147,7 +144,7 @@ class SeatReservation(object):
         if max_index > len(reservations[row]) - 1:
             return False
 
-        for seat_index in range(col + 1, (col + 1 + self.num_consecutive_seats)):
+        for seat_index in range(col, col + self.num_consecutive_seats):
             if self.is_reserved(reservations, '{}{}'.format(row_letter, seat_index)):
                 return False
 
@@ -161,7 +158,7 @@ class SeatReservation(object):
         if max_index > len(reservation[row]) - 1:
             return False
 
-        for seat_index in range(col, (col + self.num_consecutive_seats + 1)):
+        for seat_index in range(col, col + self.num_consecutive_seats):
             if not self.is_reserved(reservation, '{}{}'.format(row_letter, seat_index)):
                 return False
 
@@ -172,13 +169,17 @@ class SeatReservation(object):
 
         :return:
         """
-        reservations = self.fds.read()
+        # reservations = self.fds.read()
+        fds = FileDataStore(self.filename)
+        reservations = fds.read()
+        print('{}: {}'.format('Reservations before booking', reservations))
         if not reservations:
             return 'Fail'
 
         if self.is_reservable(reservations):
             self.reserve_seat(reservations)
-            self.fds.update(reservations)
+            fds.update(reservations)
+            print('{}: {}'.format('Reservations after booking', reservations))
             return 'Success'
 
         return 'Fail'
@@ -186,14 +187,14 @@ class SeatReservation(object):
     def reserve_seat(self, reservation):
         row, col = self.get_location(self.start_seat)
 
-        for seat_column in range(col, col + self.num_consecutive_seats + 1):
+        for seat_column in range(col, col + self.num_consecutive_seats):
             seat = reservation[row][seat_column]
             seat.reserve()
 
     def unreserve_seat(self, reservation):
         row, col = self.get_location(self.start_seat)
 
-        for seat_column in range(col, col + self.num_consecutive_seats + 1):
+        for seat_column in range(col, col + self.num_consecutive_seats):
             seat = reservation[row][seat_column]
             seat.unreserve()
 
@@ -202,13 +203,17 @@ class SeatReservation(object):
 
         :return:
         """
-        reservations = self.fds.read()
+        # reservations = self.fds.read()
+        fds = FileDataStore(self.filename)
+        reservations = fds.read()
+        print('{}: {}'.format('Reservations before cancel', reservations))
         if not reservations:
             return 'Fail'
 
         if self.is_unreservable(reservations):
             self.unreserve_seat(reservations)
-            self.fds.update(reservations)
+            fds.update(reservations)
+            print('{}: {}'.format('Reservations after cancel', reservations))
             return 'Success'
 
         return 'Fail'

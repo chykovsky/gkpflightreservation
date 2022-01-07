@@ -9,4 +9,15 @@ class Seat(object):
         self.reserved = False
 
     def __str__(self):
-        pass
+        if self.reserved:
+            state = 'booked'
+        else:
+            state = 'open'
+        return 'Seat {}'.format(state)
+
+    def __repr__(self):
+        if self.reserved:
+            state = 'booked'
+        else:
+            state = 'open'
+        return 'Seat {}'.format(state)
