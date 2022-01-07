@@ -44,13 +44,14 @@ class SeatReservation(object):
         self.start_seat = None
         self.num_consecutive_seats = None
 
-    def process_customer_request(self):
+    def process_request(self):
         booking_details = input('Book or Cancel a seat reservation: ')
         regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
         m = regex.match(booking_details)
 
         if m:
             self.action, self.start_seat, self.num_consecutive_seats = m.group().split()
+            self.num_consecutive_seats = int(self.num_consecutive_seats)
 
             if self.action.upper() == 'BOOK':
                 print(self.book())
@@ -139,6 +140,7 @@ class SeatReservation(object):
 
         if self.is_reservable(reservations):
             self.reserve_seat(reservations)
+            self.fds.update(reservations)
             return 'Success'
 
         return 'Fail'
@@ -168,6 +170,10 @@ class SeatReservation(object):
 
         if self.is_unreservable(reservations):
             self.unreserve_seat(reservations)
+            self.fds.update(reservations)
             return 'Success'
 
         return 'Fail'
+
+    def reset(self):
+        pass
