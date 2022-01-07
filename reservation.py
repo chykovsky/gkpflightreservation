@@ -1,5 +1,5 @@
-from .datastore import FileDataStore
-from .seat import Seat
+from datastore import FileDataStore
+from seat import Seat
 import re
 
 
@@ -37,8 +37,9 @@ row_letter_index_map = {
 class SeatReservation(object):
     def __init__(self, filename, rows, cols):
         self.rows, self.seats_per_row = (rows, cols)
-        self.reservations = [[Seat()] * self.seats_per_row] * self.rows
+        self.reservations = [[Seat() for _ in range(self.seats_per_row)] for _ in range(self.rows)]
         self.fds = FileDataStore(filename, self.reservations)
+        self.fds.write()
         self.action = None
         self.start_seat = None
         self.num_consecutive_seats = None
@@ -52,9 +53,10 @@ class SeatReservation(object):
             self.action, self.start_seat, self.num_consecutive_seats = m.group().split()
 
             if self.action.upper() == 'BOOK':
-                self.book()
-            else:
-                self.cancel()
+                print(self.book())
+
+            if self.action.upper() == 'CANCEL':
+                print(self.cancel())
         else:
             print('%s%s' % ('Invalid Input entered: ', BOOK_CANCEL_INFO))
             exit(1)
@@ -162,8 +164,8 @@ class SeatReservation(object):
         """
         reservations = self.fds.read()
         if not reservations:
-            return 'Fail' \
-                   ''
+            return 'Fail'
+
         if self.is_unreservable(reservations):
             self.unreserve_seat(reservations)
             return 'Success'
