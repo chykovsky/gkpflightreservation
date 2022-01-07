@@ -37,20 +37,51 @@ row_letter_index_map = {
 
 class SeatReservation(object):
     def __init__(self, filename, rows, cols):
-        self.rows, self.seats_per_row = (rows, cols)
-        if not os.path.exists(filename):
-            self.reservations = [[Seat() for _ in range(self.seats_per_row)] for _ in range(self.rows)]
-            self.fds = FileDataStore(filename, self.reservations)
-            self.fds.write()
+        self.rows, self.seats_per_row = rows, cols
+        self.reservations, self.fds = None, FileDataStore(filename)
+        self.reservations = [[Seat() for _ in range(self.seats_per_row)] for _ in range(self.rows)]
+        self.fds = FileDataStore(filename, self.reservations)
+        self.fds.write()
         self.action = None
         self.start_seat = None
         self.num_consecutive_seats = None
 
+    def process_request2(self):
+        # booking_details = input('Book or Cancel a seat reservation: ')
+
+        while True:
+            # if 'reset'.upper() in booking_details.upper():
+            #     self.fds.reset()
+            #     exit(0)
+            booking_details = input('Book or Cancel a seat reservation: ')
+
+            if 'quit'.upper() in booking_details.upper():
+                exit(0)
+
+            regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
+            m = regex.match(booking_details)
+
+            if m:
+                self.action, self.start_seat, self.num_consecutive_seats = m.group().split()
+                self.num_consecutive_seats = int(self.num_consecutive_seats)
+
+                if self.action.upper() == 'BOOK':
+                    print(self.book())
+
+                if self.action.upper() == 'CANCEL':
+                    print(self.cancel())
+            else:
+                print('%s%s' % ('Invalid Input entered: ', BOOK_CANCEL_INFO))
+                exit(1)
+
     def process_request(self):
         booking_details = input('Book or Cancel a seat reservation: ')
 
-        if 'reset'.upper() in booking_details.upper():
-            self.fds.reset()
+        # if 'reset'.upper() in booking_details.upper():
+        #     self.fds.reset()
+        #     exit(0)
+
+        if 'quit'.upper() in booking_details.upper():
             exit(0)
 
         regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)

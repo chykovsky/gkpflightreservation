@@ -3,7 +3,7 @@ from copy import deepcopy
 
 
 class FileDataStore(object):
-    def __init__(self, filename, reservations):
+    def __init__(self, filename, reservations=None):
         self.fn = filename
         self.res = reservations
         self.res_original = deepcopy(reservations)
