@@ -2,6 +2,10 @@ from datastore import FileDataStore
 from seat import Seat
 import re
 import os.path
+import logging.config
+
+logging.config.fileConfig('logging.ini', disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
 BOOK_CANCEL_INFO = """
 \tExpected format [Action] [Starting Seat] [Number of consecutive seats needed]
@@ -46,57 +50,57 @@ class SeatReservation(object):
         self.start_seat = None
         self.num_consecutive_seats = None
 
-    def process_request2(self):
+    def service(self):
         while True:
             booking_details = input('Book or Cancel a seat reservation: ')
+            logger.debug('service booking_details: %s', booking_details)
 
             if 'quit'.upper() in booking_details.upper():
                 exit(0)
 
             if 'view'.upper() in booking_details.upper():
-                fds = FileDataStore(self.filename)
-                print(fds.read())
+                self.view()
                 continue
 
-            regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
-            m = regex.match(booking_details)
+            self.process_action(booking_details)
 
-            if m:
-                self.action, self.start_seat, self.num_consecutive_seats = m.group().split()
-                self.num_consecutive_seats = int(self.num_consecutive_seats)
+    def process_action(self, booking_details):
+        regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
+        m = regex.match(booking_details)
+        if m:
+            self.action, self.start_seat, self.num_consecutive_seats = m.group().split()
+            self.num_consecutive_seats = int(self.num_consecutive_seats)
+            logger.debug('action: %s, start_seat: %s, num_consecutive_seats: %s', self.action, self.start_seat,
+                         self.num_consecutive_seats)
 
-                if self.action.upper() == 'BOOK':
-                    print(self.book())
+            if self.action.upper() == 'BOOK':
+                result = self.book()
+                logger.debug('result: %s', result)
+                print(result)
 
-                if self.action.upper() == 'CANCEL':
-                    print(self.cancel())
-            else:
-                print('Fail')
+            if self.action.upper() == 'CANCEL':
+                result = self.cancel()
+                logger.debug('result: %s', result)
+                print(result)
+        else:
+            result = 'Fail'
+            logger.debug('result: %s', result)
+            print(result)
 
-    def process_request(self):
+    def run_once(self):
+        print('Current seat map: ')
+        self.view()
         booking_details = input('Book or Cancel a seat reservation: ')
-
-        # if 'reset'.upper() in booking_details.upper():
-        #     self.fds.reset()
-        #     exit(0)
+        logger.debug('run_once booking_details: %s', booking_details)
 
         if 'quit'.upper() in booking_details.upper():
             exit(0)
 
-        regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
-        m = regex.match(booking_details)
+        self.process_action(booking_details)
 
-        if m:
-            self.action, self.start_seat, self.num_consecutive_seats = m.group().split()
-            self.num_consecutive_seats = int(self.num_consecutive_seats)
-
-            if self.action.upper() == 'BOOK':
-                print(self.book())
-
-            if self.action.upper() == 'CANCEL':
-                print(self.cancel())
-        else:
-            print('Fail')
+    def view(self):
+        fds = FileDataStore(self.filename)
+        print(fds.read())
 
     @classmethod
     def get_location(cls, ss):
