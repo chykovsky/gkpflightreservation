@@ -51,6 +51,10 @@ class SeatReservation(object):
         self.num_consecutive_seats = None
 
     def service(self):
+        """
+        Run as a service until you quit
+        :return:
+        """
         while True:
             booking_details = input('Book or Cancel a seat reservation: ')
             logger.debug('service booking_details: %s', booking_details)
@@ -88,6 +92,10 @@ class SeatReservation(object):
             print(result)
 
     def run_once(self):
+        """
+        Run once and exit
+        :return:
+        """
         print('Current seat map: ')
         self.view()
         booking_details = input('Book or Cancel a seat reservation: ')
@@ -103,30 +111,35 @@ class SeatReservation(object):
         print(fds.read())
 
     @classmethod
-    def get_location(cls, ss):
+    def get_location(cls, seat_location):
         """
         Return row number corresponding to row letter received
-        :param ss: starting seat e.g A0, B1, T7
-        :return:
+        :param seat_location: seat location e.g A0, B1, T7
+        :return: tuple of seat location integers
         """
-        a = [i for i in ss]
+        a = [i for i in seat_location]
 
         return int(row_letter_index_map[a[0].upper()]), int(a[1])
 
     @classmethod
     def get_letter(cls, seat_location):
+        """
+        Given a seat location e.g. A0, return the first character or row value e.g A
+        :param seat_location: seat location
+        :return: row value e.g A
+        """
         for i in seat_location:
             return i.upper()
 
-    def is_reserved(self, reservation, seat_location):
+    def is_reserved(self, reservations, seat_location):
         """
         Check if seat is reserved
-        :param reservation:
-        :param seat_location:
-        :return:
+        :param reservations: 2D array of seat objects
+        :param seat_location: seat location
+        :return: True or False
         """
         row, col = self.get_location(seat_location)
-        seat = reservation[row][col]
+        seat = reservations[row][col]
 
         if not seat.reserved:
             return False
@@ -135,8 +148,8 @@ class SeatReservation(object):
 
     def is_reservable(self, reservations):
         """
-
-        :param reservations:
+        Validates whether a selection of seat(s) are reservable
+        :param reservations: 2D array of seat objects
         :return: True or False
         """
         row, col = self.get_location(self.start_seat)
@@ -152,76 +165,94 @@ class SeatReservation(object):
 
         return True
 
-    def is_unreservable(self, reservation):
+    def is_unreservable(self, reservations):
+        """
+        Validates whether a selection of seat(s) are unreservable
+        :param reservations: 2D array of seat objects
+        :return: True or False
+        """
         row, col = self.get_location(self.start_seat)
         row_letter = self.get_letter(self.start_seat)
         max_index = col + (self.num_consecutive_seats - 1)
 
-        if max_index > len(reservation[row]) - 1:
+        if max_index > len(reservations[row]) - 1:
             return False
 
         for seat_index in range(col, col + self.num_consecutive_seats):
-            if not self.is_reserved(reservation, '{}{}'.format(row_letter, seat_index)):
+            if not self.is_reserved(reservations, '{}{}'.format(row_letter, seat_index)):
                 return False
 
         return True
 
     def book(self):
         """
-
-        :return:
+        Book a seat reservation
+        :return: Success or Fail
         """
-        # reservations = self.fds.read()
         fds = FileDataStore(self.filename)
         reservations = fds.read()
-        print('{}: {}'.format('Reservations before booking', reservations))
+        logger.debug('{}: {}'.format('Reservations before booking', reservations))
         if not reservations:
             return 'Fail'
 
         if self.is_reservable(reservations):
             self.reserve_seat(reservations)
             fds.update(reservations)
-            print('{}: {}'.format('Reservations after booking', reservations))
+            logger.debug('{}: {}'.format('Reservations after booking', reservations))
             return 'Success'
 
         return 'Fail'
 
-    def reserve_seat(self, reservation):
+    def reserve_seat(self, reservations):
+        """
+        Reserve a seat
+        :param reservations: 2D array of seat objects
+        :return:
+        """
         row, col = self.get_location(self.start_seat)
 
         for seat_column in range(col, col + self.num_consecutive_seats):
-            seat = reservation[row][seat_column]
+            seat = reservations[row][seat_column]
             seat.reserve()
 
-    def unreserve_seat(self, reservation):
+    def unreserve_seat(self, reservations):
+        """
+        Unreserves a booked seat.
+        :param reservations: 2D array of seat objects
+        :return:
+        """
         row, col = self.get_location(self.start_seat)
 
         for seat_column in range(col, col + self.num_consecutive_seats):
-            seat = reservation[row][seat_column]
+            seat = reservations[row][seat_column]
             seat.unreserve()
 
     def cancel(self):
         """
-
-        :return:
+        Cancel a seat reservation
+        :return: Success or Fail
         """
-        # reservations = self.fds.read()
         fds = FileDataStore(self.filename)
         reservations = fds.read()
-        print('{}: {}'.format('Reservations before cancel', reservations))
+        logger.debug('{}: {}'.format('Reservations before cancel', reservations))
         if not reservations:
             return 'Fail'
 
         if self.is_unreservable(reservations):
             self.unreserve_seat(reservations)
             fds.update(reservations)
-            print('{}: {}'.format('Reservations after cancel', reservations))
+            logger.debug('{}: {}'.format('Reservations after cancel', reservations))
             return 'Success'
 
         return 'Fail'
 
     @classmethod
     def get_key_from_value(cls, value):
+        """
+        Reverse a dictionary so values become keys and keys become values
+        :param value: value
+        :return: key
+        """
         keys = list(row_letter_index_map.keys())
         values = list(row_letter_index_map.values())
         pos = values.index(value)
