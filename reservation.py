@@ -3,7 +3,6 @@ from seat import Seat
 import re
 import os.path
 
-
 BOOK_CANCEL_INFO = """
 \tExpected format [Action] [Starting Seat] [Number of consecutive seats needed]
 \tAction: BOOK or CANCEL
@@ -39,7 +38,8 @@ class SeatReservation(object):
     def __init__(self, filename, rows, cols):
         self.filename, self.rows, self.seats_per_row, = filename, rows, cols
         if not os.path.exists(self.filename):
-            reservations = [[Seat() for _ in range(self.seats_per_row)] for _ in range(self.rows)]
+            reservations = [[Seat(self.get_key_from_value(row), col) for col in range(self.seats_per_row)] for row in
+                            range(self.rows)]
             self.fds = FileDataStore(self.filename, reservations)
             self.fds.write()
         self.action = None
@@ -47,16 +47,16 @@ class SeatReservation(object):
         self.num_consecutive_seats = None
 
     def process_request2(self):
-        # booking_details = input('Book or Cancel a seat reservation: ')
-
         while True:
-            # if 'reset'.upper() in booking_details.upper():
-            #     self.fds.reset()
-            #     exit(0)
             booking_details = input('Book or Cancel a seat reservation: ')
 
             if 'quit'.upper() in booking_details.upper():
                 exit(0)
+
+            if 'view'.upper() in booking_details.upper():
+                fds = FileDataStore(self.filename)
+                print(fds.read())
+                continue
 
             regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
             m = regex.match(booking_details)
@@ -71,8 +71,7 @@ class SeatReservation(object):
                 if self.action.upper() == 'CANCEL':
                     print(self.cancel())
             else:
-                print('%s%s' % ('Invalid Input entered: ', BOOK_CANCEL_INFO))
-                exit(1)
+                print('Fail')
 
     def process_request(self):
         booking_details = input('Book or Cancel a seat reservation: ')
@@ -97,8 +96,7 @@ class SeatReservation(object):
             if self.action.upper() == 'CANCEL':
                 print(self.cancel())
         else:
-            print('%s%s' % ('Invalid Input entered: ', BOOK_CANCEL_INFO))
-            exit(1)
+            print('Fail')
 
     @classmethod
     def get_location(cls, ss):
@@ -218,5 +216,10 @@ class SeatReservation(object):
 
         return 'Fail'
 
-    def reset(self):
-        self.fds.reset()
+    @classmethod
+    def get_key_from_value(cls, value):
+        keys = list(row_letter_index_map.keys())
+        values = list(row_letter_index_map.values())
+        pos = values.index(value)
+
+        return keys[pos]
