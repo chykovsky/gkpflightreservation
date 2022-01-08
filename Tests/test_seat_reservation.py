@@ -1,6 +1,10 @@
 from unittest import TestCase
 from reservation import SeatReservation
 import os
+import sys
+
+
+# sys.path.insert(0, '/Users/chykovsky/PycharmProjects/GKP_Homework')
 
 
 class TestSeatReservation(TestCase):
@@ -16,14 +20,11 @@ class TestSeatReservation(TestCase):
     def test_validate_init_values(self):
         self.assertEqual(self.sr.rows, self.num_rows)
         self.assertEqual(self.sr.seats_per_row, self.num_cols)
-        # self.assertEqual(len(self.sr.reservations), self.num_rows)
-        # self.assertEqual(len(self.sr.reservations[0]), self.num_cols)
-        # seat = self.sr.reservations[0][0]
-        # self.assertFalse(seat.reserved)
+        self.assertEqual(self.sr.filename, self.test_file)
+        self.assertIsNotNone(self.sr.fds)
         self.assertIsNone(self.sr.action)
         self.assertIsNone(self.sr.start_seat)
         self.assertIsNone(self.sr.num_consecutive_seats)
-        # print(self.sr.reservations)
-        # print(self.sr.reservations[0][0])
-        print(self.sr.fds.read())
 
+    def test_pass(self):
+        pass
