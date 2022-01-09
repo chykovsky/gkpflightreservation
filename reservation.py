@@ -17,42 +17,19 @@ BOOK_CANCEL_INFO = """
 """
 
 ASCII_CODE_LETTER_A = 65
-ASCII_CODE_LETTER_T = 84
-
-row_letter_index_map = {
-    'A': 0,
-    'B': 1,
-    'C': 2,
-    'D': 3,
-    'E': 4,
-    'F': 5,
-    'G': 6,
-    'H': 7,
-    'I': 8,
-    'J': 9,
-    'K': 10,
-    'L': 11,
-    'M': 12,
-    'N': 13,
-    'O': 14,
-    'P': 15,
-    'Q': 16,
-    'R': 17,
-    'S': 18,
-    'T': 19
-}
+ASCII_CODE_LETTER_Z = 90
 
 
 class SeatReservation(object):
     """
     self.rll -> row letter list
     """
+
     def __init__(self, filename, rows, cols):
         self.filename, self.rows, self.seats_per_row, = filename, rows, cols
-        self.rll = list(map(chr, range(ASCII_CODE_LETTER_A, ASCII_CODE_LETTER_T + 1)))
-        print(self.rll)
+        self.rll = list(map(chr, range(ASCII_CODE_LETTER_A, ASCII_CODE_LETTER_Z + 1)))[:self.rows]
         if not os.path.exists(self.filename):
-            reservations = [[Seat(self.get_key_from_value(row), col) for col in range(self.seats_per_row)] for row in
+            reservations = [[Seat(self.rll[row], col) for col in range(self.seats_per_row)] for row in
                             range(self.rows)]
             self.fds = FileDataStore(self.filename, reservations)
             self.fds.write()
@@ -79,6 +56,11 @@ class SeatReservation(object):
             self.process_action(booking_details)
 
     def process_action(self, booking_details):
+        """
+        Process stdin entry
+        :param booking_details:
+        :return: print Success or Fail
+        """
         regex = re.compile('\s*(book|cancel)\s+[a-t][0-7]\s+[1-8]\s*', re.IGNORECASE)
         m = regex.match(booking_details)
         if m:
@@ -120,7 +102,6 @@ class SeatReservation(object):
         fds = FileDataStore(self.filename)
         print(fds.read())
 
-    # @classmethod
     def get_location(self, seat_location):
         """
         Return row number corresponding to row letter received
@@ -129,8 +110,7 @@ class SeatReservation(object):
         """
         a = [i for i in seat_location]
 
-        # return int(row_letter_index_map[a[0].upper()]), int(a[1])
-        return self.rll.index(a[0]), int(a[1])
+        return self.rll.index(a[0].upper()), int(a[1])
 
     @classmethod
     def get_letter(cls, seat_location):
@@ -256,16 +236,3 @@ class SeatReservation(object):
             return 'Success'
 
         return 'Fail'
-
-    @classmethod
-    def get_key_from_value(cls, value):
-        """
-        Reverse a dictionary so values become keys and keys become values
-        :param value: value
-        :return: key
-        """
-        keys = list(row_letter_index_map.keys())
-        values = list(row_letter_index_map.values())
-        pos = values.index(value)
-
-        return keys[pos]

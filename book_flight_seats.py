@@ -3,10 +3,11 @@ from reservation import SeatReservation
 MSG = """
 Welcome to GKP airlines!
 Type quit to exit at any time.
-Do you want to run our app as a service? yes or no: 
+Do you want to run our app as a service? Enter yes or no: 
 """
 
-if __name__ == '__main__':
+
+def main():
     sr = SeatReservation('reservations.txt', 20, 8)
     while True:
         run_type = input(MSG)
@@ -18,3 +19,7 @@ if __name__ == '__main__':
             break
         else:
             continue
+
+
+if __name__ == '__main__':
+    main()
