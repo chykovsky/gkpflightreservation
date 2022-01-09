@@ -4,7 +4,12 @@ import re
 import os.path
 import logging.config
 
-logging.config.fileConfig('logging.ini', disable_existing_loggers=False)
+logging_ini_path = os.path.join(os.path.dirname(__file__), 'logging.ini')
+logging.config.fileConfig(logging_ini_path, disable_existing_loggers=False)
+
+# log_file_path = os.path.join(os.path.dirname(__file__), 'logs', 'seat_booking.log')
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s - %(levelname)s:%(message)s',
+#                     filename=log_file_path)
 logger = logging.getLogger(__name__)
 
 BOOK_CANCEL_INFO = """

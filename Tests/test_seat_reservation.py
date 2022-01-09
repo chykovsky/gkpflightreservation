@@ -9,7 +9,7 @@ import sys
 
 class TestSeatReservation(TestCase):
     def setUp(self):
-        super().setUp()
+        # super().setUp()
         self.num_rows = 3
         self.num_cols = 2
         self.test_file = 'test_file.txt'
