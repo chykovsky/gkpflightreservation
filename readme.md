@@ -1,6 +1,6 @@
 # Book Flight Seats
 
-book_flight_seats.py is a simple python application application that allows you to book a seat(s) on a flight.
+Book Flight Seats is a python application application provided by GKP Airlines that allows you to book a seat(s) on a flight.
 GKP Airlines only has one type of aircraft. The aircraft has 20 rows of seats and each row contains 8 seats.
 
 ## Prerequisites / Things to know
