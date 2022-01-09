@@ -4,12 +4,9 @@ import re
 import os.path
 import logging.config
 
-logging_ini_path = os.path.join(os.path.dirname(__file__), 'logging.ini')
-logging.config.fileConfig(logging_ini_path, disable_existing_loggers=False)
-
-# log_file_path = os.path.join(os.path.dirname(__file__), 'logs', 'seat_booking.log')
-# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s - %(levelname)s:%(message)s',
-#                     filename=log_file_path)
+log_file_path = os.path.join(os.path.dirname(__file__), 'logs', 'seat_booking.log')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)s - %(levelname)s:%(message)s',
+                    filename=log_file_path)
 logger = logging.getLogger(__name__)
 
 BOOK_CANCEL_INFO = """
@@ -18,6 +15,9 @@ BOOK_CANCEL_INFO = """
 \tStarting Seat: A0 - T7
 \tNumber of consecutive seats needed: 1 - 8
 """
+
+ASCII_CODE_LETTER_A = 65
+ASCII_CODE_LETTER_T = 84
 
 row_letter_index_map = {
     'A': 0,
@@ -44,8 +44,13 @@ row_letter_index_map = {
 
 
 class SeatReservation(object):
+    """
+    self.rll -> row letter list
+    """
     def __init__(self, filename, rows, cols):
         self.filename, self.rows, self.seats_per_row, = filename, rows, cols
+        self.rll = list(map(chr, range(ASCII_CODE_LETTER_A, ASCII_CODE_LETTER_T + 1)))
+        print(self.rll)
         if not os.path.exists(self.filename):
             reservations = [[Seat(self.get_key_from_value(row), col) for col in range(self.seats_per_row)] for row in
                             range(self.rows)]
@@ -115,8 +120,8 @@ class SeatReservation(object):
         fds = FileDataStore(self.filename)
         print(fds.read())
 
-    @classmethod
-    def get_location(cls, seat_location):
+    # @classmethod
+    def get_location(self, seat_location):
         """
         Return row number corresponding to row letter received
         :param seat_location: seat location e.g A0, B1, T7
@@ -124,7 +129,8 @@ class SeatReservation(object):
         """
         a = [i for i in seat_location]
 
-        return int(row_letter_index_map[a[0].upper()]), int(a[1])
+        # return int(row_letter_index_map[a[0].upper()]), int(a[1])
+        return self.rll.index(a[0]), int(a[1])
 
     @classmethod
     def get_letter(cls, seat_location):
