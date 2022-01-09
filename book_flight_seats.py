@@ -1,7 +1,7 @@
 from reservation import SeatReservation
 
 MSG = """
-Welcome to GKP airlines!
+Welcome to GKP Airlines!
 Type quit to exit at any time.
 Do you want to run our app as a service? Enter yes or no: 
 """
